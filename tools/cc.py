@@ -798,7 +798,7 @@ def c2c_dist(compared, reference, global_shift=None, max_dist=None, split_XYZ=Fa
     else:
         args += ' -NO_TIMESTAMP'
     if export_fmt == 'LAZ':
-        args += f' -C_EXPORT_FMT LAS -EXT laz'
+        args += f' -C_EXPORT_FMT LAS -EXT LAZ'
     else:
         args += f' -C_EXPORT_FMT {export_fmt}'
 
@@ -812,10 +812,12 @@ def c2c_dist(compared, reference, global_shift=None, max_dist=None, split_XYZ=Fa
 
     args += ' -c2c_dist'
 
-    if split_XYZ is True:
-        args += ' -SPLIT_XYZ'
+
     if max_dist:
         args += f' -MAX_DIST {max_dist}'
+    if split_XYZ is True:
+        args += ' -SPLIT_XYZ'
+
 
     misc.run(cc_custom + args, verbose=debug)
 
