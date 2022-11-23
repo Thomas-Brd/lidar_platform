@@ -244,7 +244,7 @@ class Overlap(object):
             for i in range(0, len(self.file_list)):
                 print("[Overlap.processing] Measure distances between lines with M3C2: " + self.pair_list[i])
                 self.measure_distances_with_m3c2(*self.file_list[i])
-                    
+
             print("[Overlap.processing] filter M3C2 results and compute statistics (mean, standard deviation)")
             self.results = Parallel(n_jobs=10, verbose=1)(
                 delayed(self.filter_m3c2_data_sbf)(

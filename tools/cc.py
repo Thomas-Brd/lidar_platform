@@ -292,17 +292,23 @@ def remove_scalar_fields(cloud, silent=True):
     misc.run(cc_custom + args)
 
 
-def rasterize(cloud, spacing, ext='_RASTER', debug=False, proj='AVG'):
+def rasterize(cloud, spacing, ext='_RASTER', proj='AVG', fmt='SBF',
+              silent=True, debug=False, global_shift='AUTO', cc=cc_std_alt):
     cloud_exists(cloud)
-    
-    args = ''
-    args += ' -SILENT -NO_TIMESTAMP'
-    args += ' -o ' + cloud
-    args += ' -RASTERIZE -GRID_STEP ' + str(spacing)
-    args += ' -PROJ ' + proj
-    misc.run(cc_custom + args, verbose=debug)
-    
-    return os.path.splitext(cloud)[0] + ext + '.bin'
+    if not os.path.exists(cloud):
+        raise FileNotFoundError
+
+    cmd = CCCommand(cc_std_alt, silent=silent, fmt=fmt)
+    cmd.open_file(cloud, global_shift=global_shift)
+    cmd.append('-RASTERIZE')
+    cmd.append('-GRID_STEP')
+    cmd.append(str(spacing))
+    cmd.append('-PROJ')
+    cmd.append(proj)
+
+    misc.run(cmd, verbose=debug)
+
+    return os.path.splitext(cloud)[0] + ext + f'.{fmt.lower()}'
 
 ##########
 #  ICPM3C2
@@ -390,7 +396,7 @@ def to_laz(fullname, debug=False, cc=cc_std, remove=False):
         return fullname
     if os.path.exists(fullname):
         args = ''
-        args += ' -SILENT -NO_TIMESTAMP'
+        args += ' -NO_TIMESTAMP'
         args += ' -C_EXPORT_FMT LAS -EXT laz'
         args += ' -O -GLOBAL_SHIFT AUTO ' + fullname
         args += ' -SAVE_CLOUDS'
