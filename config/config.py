@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Mar 30 10:28:53 2021
-
 @author: PaulLeroy
 """
 
@@ -15,6 +14,7 @@ bin_las = 'C:\\opt\\LAStools\\bin'
 
 # CloudCompare paths
 cc_std = '"C:\\Program Files\\CloudCompare\\CloudCompare.exe"'  # standard CloudCompare
+cc_std_alt = cc_std[1:-1]  # this is for proper usage in subprocesses
 # other CloudCompare versions on lidar-server
 cc_2022_07_05 = r'G:\RENNES1\PaulLeroy\CloudCompare_2022_07_05\CloudCompare.exe'
 
@@ -27,7 +27,7 @@ elif hostname == 'DESKTOP-0T01J23' or hostname == 'DESKTOP-0L5SMT4':
 else:
     cc_custom = None
 
-## fill in the QUERY_0 dictionary for legacy calls to helper applications
+# fill in the QUERY_0 dictionary for legacy calls to helper applications
 if hostname == 'LIDAR-SERVER':
     QUERY_0 = {"standard" : cc_std + ' -silent',
                "standard_view" : cc_std,
