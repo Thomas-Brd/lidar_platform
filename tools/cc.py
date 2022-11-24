@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jan 14 09:17:49 2021
+
 @author: Paul Leroy
 """
 
@@ -28,6 +29,7 @@ class Error(Exception):
 
 class CloudCompareError(Error):
     """Exception raised for errors in the input.
+
     Attributes:
         expression -- input expression in which the error occurred
         message -- explanation of the error
@@ -54,7 +56,7 @@ def format_name(in_, name_):
 def cloud_exists(cloud, verbose=False):
     head, tail = os.path.split(cloud)
     if os.path.exists(cloud):
-        if verbose is True:
+        if verbose is True: 
             logger.info(f'cloud {tail} exists')
         return True
     else:
@@ -98,6 +100,7 @@ def move_cloud(cloud, odir):
 
 def merge(files, fmt='sbf',
           silent=True, debug=False, global_shift='AUTO', cc=cc_std_alt):
+
     if len(files) == 1 or files is None:
         print("[cc.merge] only one file in parameter 'files', this is quite unexpected!")
         return None
@@ -105,7 +108,7 @@ def merge(files, fmt='sbf',
     cmd = CCCommand(cc, silent=silent, fmt=fmt)
     if global_shift == 'FIRST':
         raise "'FIRST' is not a valid option, the default is 'AUTO' or pass a valid global shift 3-tuple"
-    elif global_shift == 'AUTO':
+    elif global_shift =='AUTO':
         print("[cc.merge] WARNING be careful when using 'AUTO' if the resulting shifted coordinates are still large")
         cmd.open_file(files[0], global_shift='AUTO')
         for file in files[1:]:
@@ -142,6 +145,7 @@ def sf_interp_and_merge(src, dst, index, global_shift, silent=True, debug=False,
 def density(pc, radius, density_type,
             silent=True, debug=False, global_shift='AUTO'):
     """ Compute the density on a cloud
+
     :param pc:
     :param radius:
     :param density_type: type can be KNN SURFACE VOLUME
@@ -163,7 +167,6 @@ def density(pc, radius, density_type,
 
     root, ext = os.path.splitext(pc)
     return root + '_DENSITY.sbf'
-
 
 #############################
 # BUILD CLOUD COMPARE COMMAND
@@ -201,7 +204,6 @@ class CCCommand(list):
                 raise ValueError('invalid value for global_shit')
         self.append(fullname)
 
-
 #########################################################
 #  3DMASC KEEP_ATTRIBUTES / ONLY_FEATURES / SKIP_FEATURES
 #########################################################
@@ -228,9 +230,11 @@ def q3dmasc_get_labels(training_file):
 def q3dmasc_only_features(clouds, training_file,
                           silent=True, verbose=False, global_shift='AUTO', cc_exe=cc_custom):
     """Command line call to 3DMASC with the only_features option.
+
     In command line, the clouds to load are not read in the parameter file, you have to specify them in the call
     and you also have to associate each label to a number, the number representing the order in which the clouds
     have been loaded
+
     :param clouds: a list of cloud paths or a unique cloud path
     :param training_file: a 3DMASC parameter file
     :param silent:
@@ -271,18 +275,19 @@ def q3dmasc_only_features(clouds, training_file,
 
 
 def best_fit_plane(cloud, debug=False):
+    
     cloud_exists(cloud)
-
+    
     args = ''
     args += ' -SILENT -NO_TIMESTAMP'
     args += ' -o ' + cloud
     args += ' -BEST_FIT_PLANE '
-
+    
     misc.run(cc_custom + args, verbose=debug)
-
+    
     outputs = (os.path.splitext(cloud)[0] + '_BEST_FIT_PLANE.bin',
                os.path.splitext(cloud)[0] + '_BEST_FIT_PLANE_INFO.txt')
-
+    
     return outputs
 
 
@@ -291,7 +296,6 @@ def get_orientation_matrix(filename):
         matrix = np.genfromtxt(f, delimiter=' ', skip_header=5)
     return matrix
 
-
 ######
 # M3C2
 ######
@@ -299,10 +303,11 @@ def get_orientation_matrix(filename):
 
 def m3c2(pc1, pc2, params, core=None, fmt='SBF',
          silent=True, debug=False, global_shift='AUTO', cc=cc_std_alt):
+
     cmd = CCCommand(cc, silent=silent, fmt=fmt)
     if global_shift == 'FIRST':
         raise "'FIRST' is not a valid option, the default is 'AUTO' or pass a valid global shift 3-tuple"
-    elif global_shift == 'AUTO':
+    elif global_shift =='AUTO':
         print("[cc.m3c2] WARNING be careful when using 'AUTO' if the resulting shifted coordinates are still large")
         cmd.open_file(pc1, global_shift='AUTO')
         cmd.open_file(pc2, global_shift='FIRST')
@@ -321,7 +326,6 @@ def m3c2(pc1, pc2, params, core=None, fmt='SBF',
     root1, ext1 = os.path.splitext(pc1)
     results = root1 + f'_M3C2.{fmt.lower()}'
     return results
-
 
 #######
 # OTHER
@@ -368,9 +372,8 @@ def rasterize(cloud, spacing, ext='_RASTER', proj='AVG', fmt='SBF',
     cmd.append(proj)
 
     misc.run(cmd, verbose=debug)
-
+    
     return os.path.splitext(cloud)[0] + ext + f'.{fmt.lower()}'
-
 
 ##########
 #  ICPM3C2
@@ -414,7 +417,6 @@ def icpm3c2(pc1, pc2, params, core=None, silent=True, fmt='BIN', debug=False):
     results = os.path.join(head2, root2 + f'_ICPM3C2.{ext}')
     return results
 
-
 #################
 #  TO BIN, TO SBF
 #################
@@ -424,7 +426,7 @@ def to_bin(fullname, debug=False, shift=None, cc=cc_std):
     root, ext = os.path.splitext(fullname)
     if os.path.exists(fullname):
         args = ''
-        if debug == False:
+        if debug==False:
             args += ' -SILENT -NO_TIMESTAMP'
         else:
             args += ' -NO_TIMESTAMP'
@@ -454,6 +456,7 @@ def all_to_bin(dir_, shift, debug=False):
 
 def to_laz(fullname, remove=False,
            silent=True, debug=False, global_shift='AUTO', cc_exe=cc_std_alt):
+
     if not os.path.exists(fullname):
         raise FileNotFoundError
 
@@ -478,6 +481,7 @@ def to_laz(fullname, remove=False,
 
 def to_sbf(fullname,
            silent=True, debug=False, global_shift='AUTO', cc_exe=cc_std_alt):
+
     cmd = CCCommand(cc_exe, silent=silent, fmt='SBF')
     cmd.open_file(fullname, global_shift=global_shift)
 
@@ -500,6 +504,7 @@ def ss(fullname, algorithm='OCTREE', parameter=8, odir=None, fmt='SBF',
        silent=True, debug=False, global_shift='AUTO', cc_exe=cc_std_alt):
     """
     Use CloudCompare to subsample a cloud.
+
     :param fullname: the full name of the cloud to subsample
     :param algorithm: RANDOM SPATIAL OCTREE
     :param parameter: number of points / distance between points / subdivision level
@@ -541,7 +546,6 @@ def ss(fullname, algorithm='OCTREE', parameter=8, odir=None, fmt='SBF',
         out = dst
         return out
 
-
 #######################
 #  CLOUD TRANSFORMATION
 #######################
@@ -582,6 +586,7 @@ def apply_transformation(cloudfile, transformation, fmt='SBF',
                          global_shift=None, silent=True, debug=False):
     """
     Transform a point cloud using CloudCompare using a transformation specified in a text file.
+
     :param cloudfile:
     :param transformation:
     :param fmt:
@@ -614,14 +619,13 @@ def apply_transformation(cloudfile, transformation, fmt='SBF',
 def transform_cloud(cloud, R, T, shift=None, silent=True, debug=False):
     cloud_exists(cloud)
     head, tail = os.path.split(cloud)
-    cloud_trans = cloud  # the transformation will overwrite the cloud
+    cloud_trans = cloud # the transformation will overwrite the cloud
     transformation = os.path.join(head, 'transformation.txt')
     # Create the matrix file to be used by CloudCompare to transform the cloud
     save_trans(transformation, R, T)
     # Transform the cloud
     logger.info(f'[CC] transformation of {tail}')
     apply_transformation(cloud, transformation, cloud_trans, silent=silent, debug=debug, shift=shift)
-
 
 ###################
 #  BIN READ / WRITE
@@ -634,7 +638,6 @@ def get_from_bin(bin_):
         # 'I' unsigned int / integer / 4
         for k in range(3):
             print(chr(bytes_[k]))
-
 
 #################
 #  SBF READ/WRITE
@@ -706,7 +709,7 @@ def shift_array(array, shift, config=None, debug=False):
 
 
 def read_sbf_header(sbf, verbose=False):
-    config = configparser.ConfigParser()
+    config = configparser.ConfigParser() 
     config.optionxform = str
     with open(sbf) as f:
         config.read_file(f)
@@ -717,8 +720,9 @@ def read_sbf_header(sbf, verbose=False):
 
 
 def read_sbf(sbf, verbose=False):
-    config = read_sbf_header(sbf, verbose=verbose)  # READ .sbf header
 
+    config = read_sbf_header(sbf, verbose=verbose)  # READ .sbf header
+    
     ################
     # READ .sbf.data
     # be careful, sys.byteorder is probably 'little' (different from Cloud Compare)
@@ -744,18 +748,18 @@ def read_sbf(sbf, verbose=False):
             print(f'shift ({x_shift, y_shift, z_shift})')
             print(bytes_[37:])
             print(len(bytes_[37:]))
-        array = np.fromfile(f, dtype='>f').reshape(Np, Ns + 3)
+        array = np.fromfile(f, dtype='>f').reshape(Np, Ns+3)
         shift = np.array((x_shift, y_shift, z_shift)).reshape(1, 3)
-
+        
     # shift point cloud
     pc = shift_array(array[:, :3], shift, config)
-
+    
     # get scalar fields if any
     if Ns != 0:
         sf = array[:, 3:]
     else:
         sf = None
-
+        
     return pc, sf, config
 
 
@@ -767,11 +771,11 @@ def write_sbf(sbf, pc, sf, config=None, add_index=False, normals=None):
         SFCount = sf.shape[1]
     else:
         SFCount = 0
-
+    
     # write .sbf
-    Points = pc.shape[0]
+    Points = pc.shape[0] 
     if config is None:
-        dict_SF = {f'SF{k + 1}': f'{k + 1}' for k in range(SFCount)}
+        dict_SF = {f'SF{k+1}':f'{k+1}' for k in range(SFCount)}
         config = configparser.ConfigParser()
         config.optionxform = str
         config['SBF'] = {'Points': str(Points),
@@ -796,14 +800,14 @@ def write_sbf(sbf, pc, sf, config=None, add_index=False, normals=None):
         else:
             SFCount = 3
         config['SBF']['SFcount'] = str(SFCount)
-        config['SBF'][f'SF{SFCount + 1}'] = 'Nx'
-        config['SBF'][f'SF{SFCount + 2}'] = 'Ny'
-        config['SBF'][f'SF{SFCount + 3}'] = 'Nz'
-
+        config['SBF'][f'SF{SFCount+1}'] = 'Nx'
+        config['SBF'][f'SF{SFCount+2}'] = 'Ny'
+        config['SBF'][f'SF{SFCount+3}'] = 'Nz'
+    
     # write .sbf configuration file
     with open(path_to_sbf, 'w') as sbf:
         config.write(sbf)
-
+    
     # remove GlobalShift
     globalShift = eval(config['SBF']['GlobalShift'])
     pcOrig = pc - np.array(globalShift).reshape(1, -1)
@@ -820,7 +824,7 @@ def write_sbf(sbf, pc, sf, config=None, add_index=False, normals=None):
         b[:, :-1] = a
         b[:, -1] = np.arange(Points).astype('>f')
         a = b
-
+    
     # write .sbf.data
     with open(path_to_sbf_data, 'wb') as sbf_data:
         # 0-1 SBF header flag
@@ -837,10 +841,9 @@ def write_sbf(sbf, pc, sf, config=None, add_index=False, normals=None):
         # 28-35 Z coordinate shift
         sbf_data.write(struct.pack('>d', shift[2]))
         # 36-63 Reserved for later
-        sbf_data.write(bytes(63 - 36 + 1))
+        sbf_data.write(bytes(63-36+1))
         sbf_data.write(a)
-
-
+        
 ##########
 # C2C_DIST
 ##########
@@ -890,11 +893,11 @@ def c2c_dist(compared, reference, max_dist=None, split_XYZ=False, odir=None, exp
         if export_fmt.lower() == 'sbf':  # move .sbf.data also in cas of sbf export format
             shutil.move(output + '.data', overlap + '.data')
         output = overlap
-
+    
     return output
 
 
-def closest_point_set(compared, reference, silent=True, debug=False):
+def closest_point_set(compared, reference, silent=True, debug = False):
     compRoot, compExt = os.path.splitext(compared)
     compHead, compTail = os.path.split(compared)
     refRoot, refExt = os.path.splitext(reference)
@@ -918,9 +921,8 @@ def closest_point_set(compared, reference, silent=True, debug=False):
     refBase = os.path.splitext(os.path.split(reference)[1])[0]
 
     misc.run(cc_custom + args, verbose=debug)
-
+    
     return os.path.join(compHead, f'[{refBase}]_CPSet({compBase}).sbf')
-
 
 #####
 # ICP
@@ -929,7 +931,7 @@ def closest_point_set(compared, reference, silent=True, debug=False):
 
 def icp(compared, reference,
         overlap=None,
-        random_sampling_limit=None,
+        random_sampling_limit=None, 
         farthest_removal=False,
         iter_=None,
         silent=True, debug=False):
@@ -961,6 +963,6 @@ def icp(compared, reference,
 
     print(f'cc {args}')
     misc.run(cc_custom + args, verbose=debug)
-
+    
     out = os.path.join(os.getcwd(), 'registration_trace_log.csv')
     return out
