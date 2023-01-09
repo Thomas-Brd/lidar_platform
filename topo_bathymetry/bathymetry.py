@@ -4,7 +4,7 @@ import shutil
 
 import numpy as np
 
-from ..config.config import cc_custom, cc_std
+from ..config.config import cc_custom, cc_std,cc_2022_12_08
 from ..tools import cc, las, misc
 
 logger = logging.getLogger(__name__)
@@ -365,7 +365,7 @@ def merge_discrete_and_fwf(lines, dir_16_fwf, in_place=False):
     return no_merge
 
 
-def add_depth(line, water_surface, global_shift, octree_level=10, remove_extra_sf=False, silent=True):
+def add_depth(line, water_surface, global_shift, octree_level=10, remove_extra_sf=False, silent=True, cc_exe=cc_2022_12_08):
     print(f'processing line {line}')
 
     head, tail, root, ext = misc.head_tail_root_ext(line)
@@ -380,7 +380,7 @@ def add_depth(line, water_surface, global_shift, octree_level=10, remove_extra_s
     # use modified version of CloudCompare
     # use the same version of CloudCompare afterwards to avoid incompatibilities with SBF?
     # cmd = cc_2022_07_05
-    cmd = cc_std
+    cmd = cc_exe
     if silent:
         cmd += ' -SILENT -NO_TIMESTAMP -C_EXPORT_FMT SBF -AUTO_SAVE OFF'
     else:
@@ -408,5 +408,38 @@ def add_depth(line, water_surface, global_shift, octree_level=10, remove_extra_s
         sf, config = cc.remove_sf('UserData', sf, config)
 
     cc.write_sbf(out, pc, sf, config)
+
+    return out
+
+def add_depth_FWF(line, water_surface, global_shift, octree_level=10, remove_extra_sf=False, silent=True):
+    print(f'processing line {line}')
+
+    head, tail, root, ext = misc.head_tail_root_ext(line)
+    odir = os.path.join(head, 'with_depth')
+    os.makedirs(odir, exist_ok=True)
+    out = os.path.join(odir, root + '.laz')
+
+    x, y, z = global_shift
+
+    print("[add_depth]")
+    # be careful of global_shift, bug corrected in CloudCompare but maybe not merged in the last release
+    # use modified version of CloudCompare
+    # use the same version of CloudCompare afterwards to avoid incompatibilities with SBF?
+    # cmd = cc_2022_07_05
+    cmd = cc_2022_12_08
+    if silent:
+        cmd += ' -SILENT -NO_TIMESTAMP -C_EXPORT_FMT LAZ -AUTO_SAVE OFF'
+    else:
+        cmd += ' -NO_TIMESTAMP -C_EXPORT_FMT LAZ -AUTO_SAVE OFF'
+    cmd += f' -O -GLOBAL_SHIFT {x} {y} {z} {line}'  # compared
+    cmd += f' -O -GLOBAL_SHIFT {x} {y} {z} {water_surface}'  # reference
+    cmd += f' -C2C_DIST -OCTREE_LEVEL {octree_level} -MAX_DIST 350 -SPLIT_XYZ'
+    cmd += ' -REMOVE_SF 14'
+    cmd += ' -REMOVE_SF 13'
+    cmd += ' -REMOVE_SF 12'
+    cmd += ' -RENAME_SF LAST depth'
+    cmd += ' -POP_CLOUDS'  # remove water_surface from the database
+    cmd += f' -SAVE_CLOUDS FILE {out}'
+    misc.run(cmd)
 
     return out
