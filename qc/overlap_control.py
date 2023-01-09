@@ -11,7 +11,7 @@ import pickle
 import numpy as np
 from joblib import Parallel, delayed
 
-from lidar_platform  import las
+from lidar_platform  import las, global_shifts
 from lidar_platform.tools import cloudcompare
 from lidar_platform.topo_bathymetry.refraction_correction_helper_functions import select_pairs_overlap
 from ..tools import cc
@@ -239,7 +239,7 @@ class Overlap(object):
 
         return output
 
-    def processing(self):
+    def processing(self, global_shift='Auto'):
         if self._preprocessingStatus:
             for i in range(0, len(self.file_list)):
                 print("[Overlap.processing] Measure distances between lines with M3C2: " + self.pair_list[i])
@@ -253,7 +253,6 @@ class Overlap(object):
             )
             np.savetxt(os.path.join(self.odir, "m3c2_mean_std.txt"), self.results,
                        fmt='%s', delimiter=';', header='Comparaison;moyenne (m);ecart-type (m)')
-
             cleaned_m3c2_results = glob.glob(os.path.join(self.odir, '*_clean.sbf'))
             # if there are several files, merge them
             if len(cleaned_m3c2_results) == 1:
@@ -261,7 +260,7 @@ class Overlap(object):
             elif len(cleaned_m3c2_results) == 0:
                 print(f"[Overlap.processing] no output file, this is quite unexpected")
             else:
-                overlap_control_src = cc.merge(cleaned_m3c2_results, export_fmt='sbf')
+                overlap_control_src = cc.merge(cleaned_m3c2_results, global_shift= global_shift, fmt='sbf')
                 overlap_control_dst = os.path.join(self.workspace, f'{self.folder}_overlap_control.sbf')
                 os.rename(overlap_control_src, overlap_control_dst)
                 os.rename(overlap_control_src + '.data', overlap_control_dst + '.data')
