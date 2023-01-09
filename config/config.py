@@ -15,6 +15,9 @@ bin_las = 'C:\\opt\\LAStools\\bin'
 # CloudCompare paths
 cc_std = '"C:\\Program Files\\CloudCompare\\CloudCompare.exe"'  # standard CloudCompare
 cc_std_alt = cc_std[1:-1]  # this is for proper usage in subprocesses
+# this is the alpha version of CloudCompare with a modified version of the FWF plugin
+cc_2022_12_08 = r'G:\RENNES1\PaulLeroy\CloudCompare_2022_12_08\CloudCompare.exe'
+cc_2_13_FWF = r'C:\Program Files\CloudCompare_2.13.alpha_11_13_2022_FWF\Cloudcompare.exe'
 # other CloudCompare versions on lidar-server
 cc_2022_07_05 = r'G:\RENNES1\PaulLeroy\CloudCompare_2022_07_05\CloudCompare.exe'
 
