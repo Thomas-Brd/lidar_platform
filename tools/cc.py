@@ -331,7 +331,6 @@ def m3c2(pc1, pc2, params, core=None, fmt='SBF',
 # OTHER
 #######
 
-
 def drop_global_shift(cloud, silent=True):
     args = ''
     if silent is True:
@@ -345,6 +344,18 @@ def drop_global_shift(cloud, silent=True):
         raise CloudCompareError
     return ret
 
+def filter_ptcloud(cloud,sf_name,minvalue,maxvalue,fmt='LAZ',global_shift='AUTO',silent=True,debug=False,cc=cc_std_alt):
+    cmd = CCCommand(cc, silent=silent, fmt=fmt)
+    cmd.open_file(cloud, global_shift=global_shift)
+    cmd.append('-SET_ACTIVE_SF')
+    cmd.append(sf_name)
+    cmd.append('-FILTER_SF')
+    cmd.append(str(minvalue))
+    cmd.append(str(maxvalue))
+
+    misc.run(cmd, verbose=debug)
+
+    return os.path.splitext(cloud)[0] + f'.{fmt.lower()}'
 
 def remove_scalar_fields(cloud, silent=True):
     args = ''
@@ -860,7 +871,7 @@ def write_sbf(sbf, pc, sf, config=None, add_index=False, normals=None):
 ##########
 
 
-def c2c_dist(compared, reference, max_dist=None, split_XYZ=False, odir=None, export_fmt='SBF',
+def c2c_dist(compared, reference, max_dist=None, split_XYZ=False, octree_level=None, odir=None, export_fmt='SBF',
              global_shift=None, silent=True, debug=False):
     # cloud to cloud distance + filtering using the distance maxDist
     args = ''
@@ -883,12 +894,16 @@ def c2c_dist(compared, reference, max_dist=None, split_XYZ=False, odir=None, exp
 
     args += ' -c2c_dist'
 
-    if split_XYZ is True:
-        args += ' -SPLIT_XYZ'
+    if octree_level:
+        args += f' -OCTREE_LEVEL {octree_level}'
+
     if max_dist:
         args += f' -MAX_DIST {max_dist}'
 
-    misc.run(cc_custom + args, verbose=debug)
+    if split_XYZ is True:
+        args += ' -SPLIT_XYZ'
+
+    misc.run(cc_std + args, verbose=debug)
 
     root, ext = os.path.splitext(compared)
     if max_dist:
