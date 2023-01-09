@@ -15,7 +15,7 @@ from lidar_platform import las, sbet
 from .refraction_correction_helper_functions import correction_3d, correction_vect
 
 
-def refraction_correction(filepath, sbet_obj, minimum_depth=-0.1):
+def refraction_correction(filepath, sbet_obj, point_format, minimum_depth=-0.1):
     root, ext = os.path.splitext(filepath)
     out = os.path.join(root + "_ref_corr.laz")
 
@@ -55,7 +55,7 @@ def refraction_correction(filepath, sbet_obj, minimum_depth=-0.1):
     extra = [(("depth", "float32"), depth_all)]
     data_under_water.XYZ = coords_true
     data_corbathy = las.merge_las([data_under_water, data_above_water])
-    las.WriteLAS(out, data_corbathy, format_id=1, extra_fields=extra)
+    las.WriteLAS(out, data_corbathy, format_id=point_format, extra_fields=extra)
 
     return out
 
@@ -89,16 +89,16 @@ def refraction_correction_fwf(filepath, minimum_depth=-0.1):
 
     #return data_corbathy, extra, metadata['vlrs']
     #PL.lastools.writeLAS(filepath[0:offsetName] + "_corbathy2.laz", dataCorbathy, format_id=4, extraField=extra)
-    las.WriteLAS(filepath[0:offset_name] + output_suffix + ".laz", data_corbathy, format_id=9)
+    las.WriteLAS(filepath[0:offset_name] + output_suffix + ".laz", data_corbathy, format_id=4)
     shutil.copyfile(filepath[0:-4] + ".wdp", filepath[0:offset_name] + output_suffix + ".wdp")
 
 
-def do_work(files, sbet_params, n_jobs, fwf=False):
+def do_work(files, sbet_params, n_jobs, point_format=1, fwf=False):
     start = time.time()
 
     if fwf:
         print("[Refraction correction] full waveform mode")
-        Parallel(n_jobs=n_jobs, verbose=1)(
+        results = Parallel(n_jobs=n_jobs, verbose=1)(
             delayed(refraction_correction_fwf)(f)
             for f in files)
     else:
@@ -107,7 +107,7 @@ def do_work(files, sbet_params, n_jobs, fwf=False):
         print("[Refraction correction] SBET data processing: done")
         print("[Refraction correction] normal mode")
         results = Parallel(n_jobs=n_jobs, verbose=1)(
-            delayed(refraction_correction)(file, sbet_obj)
+            delayed(refraction_correction)(file, sbet_obj, point_format)
             for file in files)
 
     stop = time.time()
