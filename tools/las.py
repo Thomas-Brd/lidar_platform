@@ -230,7 +230,6 @@ class WriteLAS(object):
         # for extraField in extraFields:
         #     pointFormat.add_extra_dimension(laspy.ExtraBytesParams(name=extraField["name"],type=extraField["type"],description="Extras_fields"))
         # new_points=laspy.PackedPointRecord(points,point_format=pointFormat)
-
         self.point_record = laspy.LasData(header=self.create_header("1.3", format_id),
                                           points=laspy.ScaleAwarePointRecord.zeros(
                                               len(self.output_data),
